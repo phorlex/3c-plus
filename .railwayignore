@@ -1,0 +1,5 @@
+.git
+node_modules
+.env
+npm-debug.log*
+README.local.md

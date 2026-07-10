@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3C + Pipefy</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Integracao de agendamento</p>
+          <h1>3C Plus para Pipefy</h1>
+          <p class="lead">Receba o clique de agendamento da 3C e crie um card automaticamente no Pipefy, sem expor o token na URL.</p>
+        </div>
+        <div class="status" id="status">Carregando configuracao...</div>
+      </section>
+
+      <section class="panel">
+        <h2>URL para colar na 3C</h2>
+        <div class="copy-row">
+          <input id="integrationUrl" readonly value="Carregando...">
+          <button id="copyButton" type="button">Copiar</button>
+        </div>
+        <p class="hint">Cole essa URL no campo "URL de integracao" da campanha. A 3C troca os valores entre colchetes quando o agente clicar.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Teste manual</h2>
+        <form class="grid" method="get" action="/3c/agendamento">
+          <label>Nome
+            <input name="nome" placeholder="Cliente Teste">
+          </label>
+          <label>Telefone
+            <input name="telefone" placeholder="11999999999">
+          </label>
+          <label>Ramal
+            <input name="ramal" placeholder="201">
+          </label>
+          <label>Protocolo
+            <input name="protocolo" placeholder="ABC123">
+          </label>
+          <label>Identificador
+            <input name="identificador" placeholder="lead-123">
+          </label>
+          <label>Campanha
+            <input name="campanha" placeholder="55">
+          </label>
+          <label class="wide">Observacao
+            <input name="observacao" placeholder="Retornar hoje a tarde">
+          </label>
+          <label class="wide" id="secretField">Chave
+            <input name="chave" placeholder="Apenas se INTEGRATION_SECRET estiver configurado">
+          </label>
+          <button class="submit" type="submit">Criar card de teste</button>
+        </form>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

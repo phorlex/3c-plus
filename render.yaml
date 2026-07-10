@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: 3c-pipefy-agendamento
+    env: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BASE_URL
+        sync: false
+      - key: PIPEFY_TOKEN
+        sync: false
+      - key: PIPEFY_PIPE_ID
+        sync: false
+      - key: PIPEFY_CARD_TITLE
+        value: Agendamento 3C - {nome}
+      - key: PIPEFY_FIELD_MAP
+        sync: false
+      - key: INTEGRATION_SECRET
+        sync: false

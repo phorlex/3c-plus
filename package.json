@@ -1,0 +1,21 @@
+{
+  "name": "3c-pipefy-agendamento",
+  "version": "1.0.0",
+  "description": "Integracao entre URL de agendamento da 3C Plus e criacao de cards no Pipefy.",
+  "main": "src/server.js",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0"
+  },
+  "devDependencies": {}
+}
