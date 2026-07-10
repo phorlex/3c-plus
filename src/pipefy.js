@@ -26,27 +26,33 @@ function parseJsonObject(rawValue, envName) {
 
 export function normalizeInput(query, defaultValues = {}) {
   const input = {
-    nome: query.nome || query.name || "",
+    nome: cleanPlaceholder(query.nome || query.name || ""),
     telefone: formatBrazilianPhone(query.telefone || query.numero_de_telefone || query.phone || ""),
     contato_2: formatBrazilianPhone(query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || ""),
-    tem_email: query.tem_email || query.email_opcao || "",
-    email: query.email || "",
-    plataforma: query.plataforma || "",
-    ramal: query.ramal || "",
-    protocolo: query.protocolo || "",
-    identificador: query.identificador || query.identifier || "",
-    campanha: query.campanha || query.id_campanha || query.campaign || "",
-    data_agendamento: query.data_agendamento || query.data_do_agendamento || query.data || "",
-    agv: query.agv || "",
-    loja: query.loja || "",
-    observacao: query.observacao || query.obs || ""
+    tem_email: cleanPlaceholder(query.tem_email || query.email_opcao || ""),
+    email: cleanPlaceholder(query.email || ""),
+    plataforma: cleanPlaceholder(query.plataforma || ""),
+    ramal: cleanPlaceholder(query.ramal || ""),
+    protocolo: cleanPlaceholder(query.protocolo || ""),
+    identificador: cleanPlaceholder(query.identificador || query.identifier || ""),
+    campanha: cleanPlaceholder(query.campanha || query.id_campanha || query.campaign || ""),
+    data_agendamento: cleanPlaceholder(query.data_agendamento || query.data_do_agendamento || query.data || ""),
+    agv: cleanPlaceholder(query.agv || ""),
+    loja: cleanPlaceholder(query.loja || ""),
+    observacao: cleanPlaceholder(query.observacao || query.obs || "")
   };
 
   return applyDefaultValues(input, defaultValues);
 }
 
+export function cleanPlaceholder(value) {
+  const text = String(value || "").trim();
+  return /^\[[^\]]+\]$/.test(text) ? "" : text;
+}
+
 export function formatBrazilianPhone(value) {
-  const digitsOnly = String(value || "").replace(/\D/g, "");
+  const cleaned = cleanPlaceholder(value);
+  const digitsOnly = String(cleaned || "").replace(/\D/g, "");
   const digits = digitsOnly.length > 11 && digitsOnly.startsWith("55")
     ? digitsOnly.slice(2)
     : digitsOnly;
@@ -59,7 +65,7 @@ export function formatBrazilianPhone(value) {
     return `${digits.slice(0, 2)} ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
 
-  return value || "";
+  return cleaned || "";
 }
 
 export function parseSubmittedValues(input) {

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPipefyFields, buildTitle, formatBrazilianPhone, normalizeInput, parseDefaultValues, parseFieldMap, parseSubmittedValues } from "../src/pipefy.js";
+import { buildPipefyFields, buildTitle, cleanPlaceholder, formatBrazilianPhone, normalizeInput, parseDefaultValues, parseFieldMap, parseSubmittedValues } from "../src/pipefy.js";
 
 test("normaliza parametros vindos da 3C", () => {
   const input = normalizeInput({
@@ -79,4 +79,20 @@ test("formata telefones brasileiros para o Pipefy", () => {
   assert.equal(formatBrazilianPhone("(21) 96504-3422"), "21 96504-3422");
   assert.equal(formatBrazilianPhone("2133334444"), "21 3333-4444");
   assert.equal(formatBrazilianPhone("123"), "123");
+});
+
+test("remove placeholders nao substituidos pela 3C", () => {
+  assert.equal(cleanPlaceholder("[nome]"), "");
+  assert.equal(cleanPlaceholder("Lucas Souza"), "Lucas Souza");
+  assert.equal(formatBrazilianPhone("[telefone]"), "");
+
+  const input = normalizeInput({
+    nome: "[nome]",
+    telefone: "[telefone]",
+    protocolo: "[protocolo]"
+  });
+
+  assert.equal(input.nome, "");
+  assert.equal(input.telefone, "");
+  assert.equal(input.protocolo, "");
 });
