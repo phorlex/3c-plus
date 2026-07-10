@@ -136,7 +136,7 @@ Pela tela enviada, o mapa deve seguir estes titulos:
 No Railway, comece com:
 
 ```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"data_agendamento":"__today","agv":["307251915"],"loja":"📍 Nova Iguaçu"}
+PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"agv":["307251915"],"loja":"📍 Nova Iguaçu"}
 PIPEFY_FIELD_MAP={"nome":"nome","telefone":"n_mero_de_telefone","contato_2":"n_mero_de_contato_2","tem_email":"tem_e_mail","email":"email","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observa_o"}
 ```
 
@@ -145,7 +145,7 @@ Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id`
 Para campos predefinidos, configure `PIPEFY_DEFAULT_VALUES`. Pela tela enviada:
 
 ```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"data_agendamento":"__today","agv":["307251915"],"loja":"📍 Nova Iguaçu"}
+PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"agv":["307251915"],"loja":"📍 Nova Iguaçu"}
 ```
 
 Use `✅ Sim` ou `❌ Não` em `tem_email`. Para `plataforma`, use o ID da etiqueta dentro de uma lista. Para `agv`, use o ID do usuario dentro de uma lista.
@@ -167,7 +167,7 @@ IDs confirmados no Pipefy:
 
 Se a 3C enviar algum desses parametros na URL, o valor da 3C substitui o valor padrao.
 
-O valor especial `__today` preenche a data atual no formato aceito pelo Pipefy (`AAAA-MM-DD`).
+Se quiser preencher uma data fixa para testes, use `data_agendamento` em `PIPEFY_DEFAULT_VALUES` no formato aceito pelo Pipefy (`AAAA-MM-DD`). Para producao, deixe sem data fixa e envie `data_agendamento=AAAA-MM-DD` na URL quando houver uma data definida.
 
 ## Observacao de seguranca
 

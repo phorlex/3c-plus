@@ -51,7 +51,8 @@ app.get("/api/config", (req, res) => {
     "ramal=[ramal]",
     "protocolo=[protocolo]",
     "identificador=[identificador]",
-    "campanha=[id_campanha]"
+    "campanha=[id_campanha]",
+    "data_agendamento=[data_agendamento]"
   ];
 
   if (config.integrationSecret) {
