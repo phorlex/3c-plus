@@ -75,6 +75,7 @@ test("formata telefones brasileiros para o Pipefy", () => {
 
 test("remove placeholders nao substituidos pela 3C", () => {
   assert.equal(cleanPlaceholder("[nome]"), "");
+  assert.equal(cleanPlaceholder('["317476817"]'), '["317476817"]');
   assert.equal(cleanPlaceholder("Lucas Souza"), "Lucas Souza");
   assert.equal(formatBrazilianPhone("[telefone]"), "");
 

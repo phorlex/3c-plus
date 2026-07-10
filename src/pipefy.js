@@ -43,7 +43,7 @@ export function normalizeInput(query) {
 
 export function cleanPlaceholder(value) {
   const text = String(value || "").trim();
-  return /^\[[^\]]+\]$/.test(text) ? "" : text;
+  return /^\[[a-zA-Z0-9_]+\]$/.test(text) ? "" : text;
 }
 
 export function formatBrazilianPhone(value) {
