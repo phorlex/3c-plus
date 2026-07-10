@@ -27,8 +27,8 @@ function parseJsonObject(rawValue, envName) {
 export function normalizeInput(query, defaultValues = {}) {
   const input = {
     nome: query.nome || query.name || "",
-    telefone: query.telefone || query.numero_de_telefone || query.phone || "",
-    contato_2: query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || "",
+    telefone: formatBrazilianPhone(query.telefone || query.numero_de_telefone || query.phone || ""),
+    contato_2: formatBrazilianPhone(query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || ""),
     tem_email: query.tem_email || query.email_opcao || "",
     email: query.email || "",
     plataforma: query.plataforma || "",
@@ -43,6 +43,23 @@ export function normalizeInput(query, defaultValues = {}) {
   };
 
   return applyDefaultValues(input, defaultValues);
+}
+
+export function formatBrazilianPhone(value) {
+  const digitsOnly = String(value || "").replace(/\D/g, "");
+  const digits = digitsOnly.length > 11 && digitsOnly.startsWith("55")
+    ? digitsOnly.slice(2)
+    : digitsOnly;
+
+  if (digits.length === 11) {
+    return `${digits.slice(0, 2)} ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+
+  if (digits.length === 10) {
+    return `${digits.slice(0, 2)} ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return value || "";
 }
 
 export function parseSubmittedValues(input) {
