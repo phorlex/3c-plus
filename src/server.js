@@ -6,6 +6,7 @@ import {
   buildTitle,
   createPipefyCard,
   normalizeInput,
+  parseDefaultValues,
   parseFieldMap
 } from "./pipefy.js";
 
@@ -30,6 +31,7 @@ function getConfig() {
     pipefyPipeId: process.env.PIPEFY_PIPE_ID || "",
     integrationSecret: process.env.INTEGRATION_SECRET || "",
     cardTitleTemplate: process.env.PIPEFY_CARD_TITLE || "Agendamento 3C - {nome}",
+    defaultValues: parseDefaultValues(process.env.PIPEFY_DEFAULT_VALUES || "{}"),
     fieldMap: parseFieldMap(process.env.PIPEFY_FIELD_MAP || "{}")
   };
 }
@@ -60,6 +62,7 @@ app.get("/api/config", (req, res) => {
     configured: Boolean(config.pipefyToken && config.pipefyPipeId),
     baseUrl: config.baseUrl,
     integrationUrl: `${config.baseUrl.replace(/\/$/, "")}/3c/agendamento?${params.join("&")}`,
+    defaultValues: Object.keys(config.defaultValues),
     mappedFields: Object.keys(config.fieldMap)
   });
 });
@@ -77,7 +80,7 @@ app.all("/3c/agendamento", async (req, res) => {
     return sendResult(req, res, 401, result, wantsJson);
   }
 
-  const input = normalizeInput({ ...req.query, ...req.body });
+  const input = normalizeInput({ ...req.query, ...req.body }, config.defaultValues);
   const title = buildTitle(config.cardTitleTemplate, input);
   const fields = buildPipefyFields(input, config.fieldMap);
 

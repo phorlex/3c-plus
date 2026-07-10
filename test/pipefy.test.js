@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPipefyFields, buildTitle, normalizeInput, parseFieldMap } from "../src/pipefy.js";
+import { buildPipefyFields, buildTitle, normalizeInput, parseDefaultValues, parseFieldMap } from "../src/pipefy.js";
 
 test("normaliza parametros vindos da 3C", () => {
   const input = normalizeInput({
@@ -39,7 +39,20 @@ test("gera fields_attributes com o mapa configurado", () => {
   ]);
 });
 
+test("aplica valores padrao quando a 3C nao envia o campo", () => {
+  const input = normalizeInput(
+    { nome: "Ana", telefone: "11999999999" },
+    { tem_email: "Nao", plataforma: "Feito por IA", agv: "Alessandro Mendes" }
+  );
+
+  assert.equal(input.nome, "Ana");
+  assert.equal(input.tem_email, "Nao");
+  assert.equal(input.plataforma, "Feito por IA");
+  assert.equal(input.agv, "Alessandro Mendes");
+});
+
 test("valida JSON do mapa de campos", () => {
   assert.deepEqual(parseFieldMap('{"nome":"nome_cliente"}'), { nome: "nome_cliente" });
   assert.throws(() => parseFieldMap("nao-json"), /PIPEFY_FIELD_MAP invalido/);
+  assert.deepEqual(parseDefaultValues('{"tem_email":"Nao"}'), { tem_email: "Nao" });
 });

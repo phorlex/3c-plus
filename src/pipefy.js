@@ -1,6 +1,14 @@
 const PIPEFY_API_URL = "https://api.pipefy.com/graphql";
 
 export function parseFieldMap(rawValue) {
+  return parseJsonObject(rawValue, "PIPEFY_FIELD_MAP");
+}
+
+export function parseDefaultValues(rawValue) {
+  return parseJsonObject(rawValue, "PIPEFY_DEFAULT_VALUES");
+}
+
+function parseJsonObject(rawValue, envName) {
   if (!rawValue || !rawValue.trim()) {
     return {};
   }
@@ -8,16 +16,16 @@ export function parseFieldMap(rawValue) {
   try {
     const parsed = JSON.parse(rawValue);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("PIPEFY_FIELD_MAP precisa ser um objeto JSON.");
+      throw new Error(`${envName} precisa ser um objeto JSON.`);
     }
     return parsed;
   } catch (error) {
-    throw new Error(`PIPEFY_FIELD_MAP invalido: ${error.message}`);
+    throw new Error(`${envName} invalido: ${error.message}`);
   }
 }
 
-export function normalizeInput(query) {
-  return {
+export function normalizeInput(query, defaultValues = {}) {
+  const input = {
     nome: query.nome || query.name || "",
     telefone: query.telefone || query.numero_de_telefone || query.phone || "",
     contato_2: query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || "",
@@ -32,6 +40,19 @@ export function normalizeInput(query) {
     loja: query.loja || "",
     observacao: query.observacao || query.obs || ""
   };
+
+  return applyDefaultValues(input, defaultValues);
+}
+
+export function applyDefaultValues(input, defaultValues) {
+  return Object.fromEntries(
+    Object.entries(input).map(([key, value]) => [
+      key,
+      value === "" || value === undefined || value === null
+        ? defaultValues[key] ?? ""
+        : value
+    ])
+  );
 }
 
 export function buildTitle(template, input) {
@@ -46,7 +67,7 @@ export function buildPipefyFields(input, fieldMap) {
     .filter(([sourceKey, fieldId]) => fieldId && input[sourceKey] !== undefined && input[sourceKey] !== "")
     .map(([sourceKey, fieldId]) => ({
       field_id: String(fieldId),
-      field_value: String(input[sourceKey])
+      field_value: input[sourceKey]
     }));
 }
 

@@ -136,10 +136,21 @@ Pela tela enviada, o mapa deve seguir estes titulos:
 No Railway, comece com:
 
 ```env
+PIPEFY_DEFAULT_VALUES={"tem_email":"Nao","plataforma":"Feito por IA","agv":"Alessandro Mendes","loja":""}
 PIPEFY_FIELD_MAP={"nome":"nome","telefone":"numero_de_telefone","contato_2":"numero_de_contato_2","tem_email":"tem_e_mail","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observacao"}
 ```
 
 Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id` real desse campo no Pipefy e troque o valor da direita.
+
+Para campos predefinidos, configure `PIPEFY_DEFAULT_VALUES`. Pela tela enviada:
+
+```env
+PIPEFY_DEFAULT_VALUES={"tem_email":"Nao","plataforma":"Feito por IA","agv":"Alessandro Mendes","loja":""}
+```
+
+Use `Sim` ou `Nao` em `tem_email`. Para `plataforma`, use uma das etiquetas exatamente como aparece no Pipefy, por exemplo `Feito por IA`, `Google ADS`, `iCarros`, `Campanha Facebook`. Para `agv`, use o nome do responsavel exatamente como aparece, por exemplo `Alessandro Mendes`.
+
+Se a 3C enviar algum desses parametros na URL, o valor da 3C substitui o valor padrao.
 
 ## Observacao de seguranca
 
