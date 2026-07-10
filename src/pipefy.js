@@ -54,11 +54,11 @@ export function formatBrazilianPhone(value) {
     : digitsOnly;
 
   if (digits.length === 11) {
-    return `${digits.slice(0, 2)} ${digits.slice(2, 7)}-${digits.slice(7)}`;
+    return `+55 ${digits.slice(0, 2)} ${digits.slice(2, 7)}-${digits.slice(7)}`;
   }
 
   if (digits.length === 10) {
-    return `${digits.slice(0, 2)} ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `+55 ${digits.slice(0, 2)} ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
 
   return cleaned || "";

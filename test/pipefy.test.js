@@ -12,8 +12,8 @@ test("normaliza parametros vindos da 3C", () => {
   });
 
   assert.equal(input.nome, "Ana");
-  assert.equal(input.telefone, "11 99999-9999");
-  assert.equal(input.contato_2, "11 88888-8888");
+  assert.equal(input.telefone, "+55 11 99999-9999");
+  assert.equal(input.contato_2, "+55 11 88888-8888");
   assert.equal(input.data_agendamento, "2026-07-10");
   assert.equal(input.campanha, "44");
 });
@@ -67,9 +67,9 @@ test("converte plataforma e agv simples para listas de IDs", () => {
 });
 
 test("formata telefones brasileiros para o Pipefy", () => {
-  assert.equal(formatBrazilianPhone("5521965043422"), "21 96504-3422");
-  assert.equal(formatBrazilianPhone("(21) 96504-3422"), "21 96504-3422");
-  assert.equal(formatBrazilianPhone("2133334444"), "21 3333-4444");
+  assert.equal(formatBrazilianPhone("5521965043422"), "+55 21 96504-3422");
+  assert.equal(formatBrazilianPhone("(21) 96504-3422"), "+55 21 96504-3422");
+  assert.equal(formatBrazilianPhone("2133334444"), "+55 21 3333-4444");
   assert.equal(formatBrazilianPhone("123"), "123");
 });
 
