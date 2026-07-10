@@ -14,7 +14,10 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 
 app.use(helmet({
-  contentSecurityPolicy: false
+  contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  frameguard: false
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
