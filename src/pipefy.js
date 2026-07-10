@@ -30,6 +30,7 @@ export function normalizeInput(query, defaultValues = {}) {
     telefone: query.telefone || query.numero_de_telefone || query.phone || "",
     contato_2: query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || "",
     tem_email: query.tem_email || query.email_opcao || "",
+    email: query.email || "",
     plataforma: query.plataforma || "",
     ramal: query.ramal || "",
     protocolo: query.protocolo || "",
@@ -49,10 +50,18 @@ export function applyDefaultValues(input, defaultValues) {
     Object.entries(input).map(([key, value]) => [
       key,
       value === "" || value === undefined || value === null
-        ? defaultValues[key] ?? ""
+        ? resolveDefaultValue(defaultValues[key])
         : value
     ])
   );
+}
+
+function resolveDefaultValue(value) {
+  if (value === "__today") {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  return value ?? "";
 }
 
 export function buildTitle(template, input) {

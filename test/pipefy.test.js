@@ -42,13 +42,18 @@ test("gera fields_attributes com o mapa configurado", () => {
 test("aplica valores padrao quando a 3C nao envia o campo", () => {
   const input = normalizeInput(
     { nome: "Ana", telefone: "11999999999" },
-    { tem_email: "Nao", plataforma: "Feito por IA", agv: "Alessandro Mendes" }
+    { tem_email: "❌ Não", plataforma: ["317663860"], agv: ["307251915"] }
   );
 
   assert.equal(input.nome, "Ana");
-  assert.equal(input.tem_email, "Nao");
-  assert.equal(input.plataforma, "Feito por IA");
-  assert.equal(input.agv, "Alessandro Mendes");
+  assert.equal(input.tem_email, "❌ Não");
+  assert.deepEqual(input.plataforma, ["317663860"]);
+  assert.deepEqual(input.agv, ["307251915"]);
+});
+
+test("resolve data padrao como hoje", () => {
+  const input = normalizeInput({}, { data_agendamento: "__today" });
+  assert.match(input.data_agendamento, /^\d{4}-\d{2}-\d{2}$/);
 });
 
 test("valida JSON do mapa de campos", () => {

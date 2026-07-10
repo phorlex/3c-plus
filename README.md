@@ -136,8 +136,8 @@ Pela tela enviada, o mapa deve seguir estes titulos:
 No Railway, comece com:
 
 ```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"Nao","plataforma":"Feito por IA","agv":"Alessandro Mendes","loja":""}
-PIPEFY_FIELD_MAP={"nome":"nome","telefone":"numero_de_telefone","contato_2":"numero_de_contato_2","tem_email":"tem_e_mail","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observacao"}
+PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"data_agendamento":"__today","agv":["307251915"],"loja":"📍 Nova Iguaçu"}
+PIPEFY_FIELD_MAP={"nome":"nome","telefone":"n_mero_de_telefone","contato_2":"n_mero_de_contato_2","tem_email":"tem_e_mail","email":"email","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observa_o"}
 ```
 
 Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id` real desse campo no Pipefy e troque o valor da direita.
@@ -145,12 +145,29 @@ Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id`
 Para campos predefinidos, configure `PIPEFY_DEFAULT_VALUES`. Pela tela enviada:
 
 ```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"Nao","plataforma":"Feito por IA","agv":"Alessandro Mendes","loja":""}
+PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não","plataforma":["317663860"],"data_agendamento":"__today","agv":["307251915"],"loja":"📍 Nova Iguaçu"}
 ```
 
-Use `Sim` ou `Nao` em `tem_email`. Para `plataforma`, use uma das etiquetas exatamente como aparece no Pipefy, por exemplo `Feito por IA`, `Google ADS`, `iCarros`, `Campanha Facebook`. Para `agv`, use o nome do responsavel exatamente como aparece, por exemplo `Alessandro Mendes`.
+Use `✅ Sim` ou `❌ Não` em `tem_email`. Para `plataforma`, use o ID da etiqueta dentro de uma lista. Para `agv`, use o ID do usuario dentro de uma lista.
+
+IDs confirmados no Pipefy:
+
+| Campo | Field ID | Tipo | Valores uteis |
+| --- | --- | --- | --- |
+| Nome | `nome` | short_text | texto |
+| Numero de telefone | `n_mero_de_telefone` | phone | telefone |
+| Numero de contato 2 | `n_mero_de_contato_2` | phone | telefone |
+| TEM E-MAIL? | `tem_e_mail` | select | `✅ Sim`, `❌ Não` |
+| Email | `email` | email | email |
+| PLATAFORMA | `plataforma` | label_select | `317663860` = Feito por IA |
+| DATA DO AGENDAMENTO | `data_do_agendamento` | date | `AAAA-MM-DD` |
+| AGV | `agv` | assignee_select | `307251915` = Alexsandro Mendes |
+| Loja | `loja` | select | `📍 Nova Iguaçu`, `📍 Duque de Caxias` |
+| Observacao | `observa_o` | long_text | texto |
 
 Se a 3C enviar algum desses parametros na URL, o valor da 3C substitui o valor padrao.
+
+O valor especial `__today` preenche a data atual no formato aceito pelo Pipefy (`AAAA-MM-DD`).
 
 ## Observacao de seguranca
 
