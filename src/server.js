@@ -127,8 +127,15 @@ app.get("/3c/agendamento", async (req, res) => {
 app.post("/3c/agendamento", async (req, res) => {
   const config = getConfig();
   const wantsJson = req.query.formato === "json" || req.body.formato === "json" || req.accepts(["html", "json"]) === "json";
+  const requestId = createRequestId();
 
   if (!validateSecret(req, config)) {
+    logEvent("warn", "card_create_rejected_invalid_secret", {
+      requestId,
+      protocolo: req.body.protocolo,
+      identificador: req.body.identificador
+    });
+
     const result = {
       status: "erro",
       title: "Chave invalida",
@@ -141,12 +148,37 @@ app.post("/3c/agendamento", async (req, res) => {
   const title = buildTitle(config.cardTitleTemplate, input);
   const fields = buildPipefyFields(input, config.fieldMap);
 
+  logEvent("info", "card_create_started", {
+    requestId,
+    pipeId: config.pipefyPipeId,
+    title,
+    nome: input.nome,
+    telefone: input.telefone,
+    protocolo: input.protocolo,
+    identificador: input.identificador,
+    plataforma: input.plataforma,
+    agv: input.agv,
+    loja: input.loja,
+    data_agendamento: input.data_agendamento,
+    fieldCount: fields.length,
+    fieldIds: fields.map((field) => field.field_id)
+  });
+
   try {
     const card = await createPipefyCard({
       token: config.pipefyToken,
       pipeId: config.pipefyPipeId,
       title,
       fields
+    });
+
+    logEvent("info", "card_create_succeeded", {
+      requestId,
+      cardId: card.id,
+      cardTitle: card.title,
+      cardUrl: card.url,
+      protocolo: input.protocolo,
+      identificador: input.identificador
     });
 
     return sendResult(req, res, 201, {
@@ -156,7 +188,17 @@ app.post("/3c/agendamento", async (req, res) => {
       card
     }, wantsJson);
   } catch (error) {
-    console.error(error);
+    logEvent("error", "card_create_failed", {
+      requestId,
+      message: error.message,
+      stack: error.stack,
+      protocolo: input.protocolo,
+      identificador: input.identificador,
+      title,
+      fieldCount: fields.length,
+      fieldIds: fields.map((field) => field.field_id)
+    });
+
     return sendResult(req, res, 500, {
       status: "erro",
       title: "Nao foi possivel criar o card",
@@ -345,6 +387,30 @@ function renderIdListOptions(items, selectedValue) {
   return items
     .map((item) => optionValue(JSON.stringify([item.id]), item.name, selectedValue))
     .join("");
+}
+
+function createRequestId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function logEvent(level, event, data = {}) {
+  const entry = {
+    timestamp: new Date().toISOString(),
+    level,
+    event,
+    ...data
+  };
+
+  const line = JSON.stringify(entry);
+  if (level === "error") {
+    console.error(line);
+    return;
+  }
+  if (level === "warn") {
+    console.warn(line);
+    return;
+  }
+  console.log(line);
 }
 
 function sendResult(req, res, httpStatus, result, wantsJson) {
