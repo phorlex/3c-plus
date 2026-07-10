@@ -5,12 +5,16 @@ import { buildPipefyFields, buildTitle, normalizeInput, parseFieldMap } from "..
 test("normaliza parametros vindos da 3C", () => {
   const input = normalizeInput({
     nome: "Ana",
-    telefone: "11999999999",
+    numero_de_telefone: "11999999999",
+    numero_de_contato_2: "11888888888",
+    data_do_agendamento: "2026-07-10",
     id_campanha: "44"
   });
 
   assert.equal(input.nome, "Ana");
   assert.equal(input.telefone, "11999999999");
+  assert.equal(input.contato_2, "11888888888");
+  assert.equal(input.data_agendamento, "2026-07-10");
   assert.equal(input.campanha, "44");
 });
 

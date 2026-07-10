@@ -19,12 +19,17 @@ export function parseFieldMap(rawValue) {
 export function normalizeInput(query) {
   return {
     nome: query.nome || query.name || "",
-    telefone: query.telefone || query.phone || "",
+    telefone: query.telefone || query.numero_de_telefone || query.phone || "",
+    contato_2: query.contato_2 || query.numero_de_contato_2 || query.telefone_2 || "",
+    tem_email: query.tem_email || query.email_opcao || "",
+    plataforma: query.plataforma || "",
     ramal: query.ramal || "",
     protocolo: query.protocolo || "",
     identificador: query.identificador || query.identifier || "",
     campanha: query.campanha || query.id_campanha || query.campaign || "",
-    data_agendamento: query.data_agendamento || query.data || "",
+    data_agendamento: query.data_agendamento || query.data_do_agendamento || query.data || "",
+    agv: query.agv || "",
+    loja: query.loja || "",
     observacao: query.observacao || query.obs || ""
   };
 }

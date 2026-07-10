@@ -105,12 +105,41 @@ O Railway injeta a porta automaticamente pela variavel `PORT`; o sistema ja usa 
 
 - `nome`
 - `telefone`
+- `contato_2` ou `numero_de_contato_2`
+- `tem_email`
+- `plataforma`
 - `ramal`
 - `protocolo`
 - `identificador`
 - `campanha` ou `id_campanha`
-- `data_agendamento`
+- `data_agendamento` ou `data_do_agendamento`
+- `agv`
+- `loja`
 - `observacao`
+
+## Campos da tela do Pipefy
+
+Pela tela enviada, o mapa deve seguir estes titulos:
+
+| Tela do Pipefy | Parametro no sistema | Field ID provavel |
+| --- | --- | --- |
+| Nome | `nome` | `nome` |
+| Numero de telefone | `telefone` | `numero_de_telefone` |
+| Numero de contato 2 | `contato_2` | `numero_de_contato_2` |
+| TEM E-MAIL? | `tem_email` | `tem_e_mail` |
+| PLATAFORMA | `plataforma` | `plataforma` |
+| DATA DO AGENDAMENTO | `data_agendamento` | `data_do_agendamento` |
+| AGV | `agv` | `agv` |
+| Loja | `loja` | `loja` |
+| Observacao | `observacao` | `observacao` |
+
+No Railway, comece com:
+
+```env
+PIPEFY_FIELD_MAP={"nome":"nome","telefone":"numero_de_telefone","contato_2":"numero_de_contato_2","tem_email":"tem_e_mail","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observacao"}
+```
+
+Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id` real desse campo no Pipefy e troque o valor da direita.
 
 ## Observacao de seguranca
 
