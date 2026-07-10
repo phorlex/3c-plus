@@ -287,6 +287,7 @@ function renderSchedulingForm(input, config, options) {
 
         <label>PLATAFORMA
           <select name="plataforma" required>
+            ${emptyOption("Selecione a plataforma", input.plataforma)}
             ${renderIdListOptions(options.platforms, input.plataforma)}
           </select>
         </label>
@@ -297,12 +298,14 @@ function renderSchedulingForm(input, config, options) {
 
         <label>AGV
           <select name="agv" required>
+            ${emptyOption("Selecione o AGV", input.agv)}
             ${renderIdListOptions(options.agvs, input.agv)}
           </select>
         </label>
 
         <label>Loja
           <select name="loja" required>
+            ${emptyOption("Selecione a loja", input.loja)}
             ${option("📍 Nova Iguaçu", input.loja)}
             ${option("📍 Duque de Caxias", input.loja)}
           </select>
@@ -325,6 +328,11 @@ function hiddenInput(name, value) {
 
 function option(value, selectedValue) {
   return optionValue(value, value, selectedValue);
+}
+
+function emptyOption(label, selectedValue) {
+  const selected = selectedValue ? "" : " selected";
+  return `<option value=""${selected} disabled>${escapeHtml(label)}</option>`;
 }
 
 function optionValue(value, label, selectedValue) {
