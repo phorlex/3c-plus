@@ -1,4 +1,11 @@
 const PIPEFY_API_URL = "https://api.pipefy.com/graphql";
+const OPTIONS_CACHE_MS = 5 * 60 * 1000;
+
+let optionsCache = {
+  key: "",
+  expiresAt: 0,
+  data: null
+};
 
 export function parseFieldMap(rawValue) {
   return parseJsonObject(rawValue, "PIPEFY_FIELD_MAP");
@@ -149,4 +156,71 @@ export async function createPipefyCard({ token, pipeId, title, fields }) {
   }
 
   return payload.data.createCard.card;
+}
+
+export async function getPipefyFormOptions({ token, pipeId }) {
+  if (!token || !pipeId) {
+    return { platforms: [], agvs: [] };
+  }
+
+  const cacheKey = `${pipeId}:${token.slice(-8)}`;
+  if (optionsCache.key === cacheKey && optionsCache.expiresAt > Date.now()) {
+    return optionsCache.data;
+  }
+
+  const query = `
+    query PipeFormOptions($id: ID!) {
+      pipe(id: $id) {
+        labels {
+          id
+          name
+        }
+        members {
+          user {
+            id
+            name
+            email
+          }
+        }
+      }
+    }
+  `;
+
+  const response = await fetch(PIPEFY_API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      query,
+      variables: { id: pipeId }
+    })
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok || payload?.errors?.length) {
+    const detail = payload?.errors?.map((error) => error.message).join("; ") || response.statusText;
+    throw new Error(`Nao foi possivel carregar opcoes do Pipefy: ${detail}`);
+  }
+
+  const data = {
+    platforms: (payload.data.pipe.labels || [])
+      .map((label) => ({ id: String(label.id), name: label.name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR")),
+    agvs: (payload.data.pipe.members || [])
+      .map((member) => member.user)
+      .filter(Boolean)
+      .map((user) => ({ id: String(user.id), name: user.name?.trim() || user.email || String(user.id) }))
+      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
+  };
+
+  optionsCache = {
+    key: cacheKey,
+    expiresAt: Date.now() + OPTIONS_CACHE_MS,
+    data
+  };
+
+  return data;
 }

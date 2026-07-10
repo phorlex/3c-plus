@@ -5,6 +5,7 @@ import {
   buildPipefyFields,
   buildTitle,
   createPipefyCard,
+  getPipefyFormOptions,
   normalizeInput,
   parseDefaultValues,
   parseFieldMap,
@@ -72,7 +73,28 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-app.get("/3c/agendamento", (req, res) => {
+const fallbackOptions = {
+  platforms: [
+    { id: "317663860", name: "Feito por IA" },
+    { id: "317476820", name: "Campanha Facebook" },
+    { id: "317720758", name: "Chat (Plataformas)" },
+    { id: "317476818", name: "Chave na Mão" },
+    { id: "317681036", name: "Google ADS" },
+    { id: "317476796", name: "iCarros" },
+    { id: "317476817", name: "OLX" },
+    { id: "317476795", name: "Webmotors" }
+  ],
+  agvs: [
+    { id: "307251915", name: "Alexsandro Mendes" },
+    { id: "307655010", name: "Amanda Correa Chagas" },
+    { id: "307807456", name: "Ana Shirley" },
+    { id: "307655011", name: "Gabrielly da Silva Clementino" },
+    { id: "307756027", name: "Joice Oliveira" },
+    { id: "307800051", name: "Kaíque Bertolini" }
+  ]
+};
+
+app.get("/3c/agendamento", async (req, res) => {
   const config = getConfig();
 
   if (!validateSecret(req, config)) {
@@ -84,7 +106,8 @@ app.get("/3c/agendamento", (req, res) => {
   }
 
   const input = normalizeInput(req.query, config.defaultValues);
-  return res.send(renderSchedulingForm(input, config));
+  const options = await loadFormOptions(config);
+  return res.send(renderSchedulingForm(input, config, options));
 });
 
 app.post("/3c/agendamento", async (req, res) => {
@@ -132,6 +155,23 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
+async function loadFormOptions(config) {
+  try {
+    const options = await getPipefyFormOptions({
+      token: config.pipefyToken,
+      pipeId: config.pipefyPipeId
+    });
+
+    return {
+      platforms: options.platforms.length ? options.platforms : fallbackOptions.platforms,
+      agvs: options.agvs.length ? options.agvs : fallbackOptions.agvs
+    };
+  } catch (error) {
+    console.error(error);
+    return fallbackOptions;
+  }
+}
+
 function renderResult({ status, title, message, card }) {
   const isSuccess = status === "sucesso";
   const cardLink = card?.url
@@ -158,7 +198,7 @@ function renderResult({ status, title, message, card }) {
 </html>`;
 }
 
-function renderSchedulingForm(input, config) {
+function renderSchedulingForm(input, config, options) {
   const action = `${config.baseUrl.replace(/\/$/, "")}/3c/agendamento`;
   const secretInput = config.integrationSecret
     ? `<input type="hidden" name="chave" value="${escapeHtml(config.integrationSecret)}">`
@@ -210,14 +250,7 @@ function renderSchedulingForm(input, config) {
 
         <label>PLATAFORMA
           <select name="plataforma" required>
-            ${optionValue('["317663860"]', "Feito por IA", input.plataforma)}
-            ${optionValue('["317476820"]', "Campanha Facebook", input.plataforma)}
-            ${optionValue('["317720758"]', "Chat (Plataformas)", input.plataforma)}
-            ${optionValue('["317476818"]', "Chave na Mão", input.plataforma)}
-            ${optionValue('["317681036"]', "Google ADS", input.plataforma)}
-            ${optionValue('["317476796"]', "iCarros", input.plataforma)}
-            ${optionValue('["317476817"]', "OLX", input.plataforma)}
-            ${optionValue('["317476795"]', "Webmotors", input.plataforma)}
+            ${renderIdListOptions(options.platforms, input.plataforma)}
           </select>
         </label>
 
@@ -227,12 +260,7 @@ function renderSchedulingForm(input, config) {
 
         <label>AGV
           <select name="agv" required>
-            ${optionValue('["307251915"]', "Alexsandro Mendes", input.agv)}
-            ${optionValue('["307655010"]', "Amanda Correa Chagas", input.agv)}
-            ${optionValue('["307807456"]', "Ana Shirley", input.agv)}
-            ${optionValue('["307655011"]', "Gabrielly da Silva Clementino", input.agv)}
-            ${optionValue('["307756027"]', "Joice Oliveira", input.agv)}
-            ${optionValue('["307800051"]', "Kaíque Bertolini", input.agv)}
+            ${renderIdListOptions(options.agvs, input.agv)}
           </select>
         </label>
 
@@ -266,6 +294,12 @@ function optionValue(value, label, selectedValue) {
   const normalized = Array.isArray(selectedValue) ? JSON.stringify(selectedValue) : String(selectedValue ?? "");
   const selected = normalized === value ? " selected" : "";
   return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
+}
+
+function renderIdListOptions(items, selectedValue) {
+  return items
+    .map((item) => optionValue(JSON.stringify([item.id]), item.name, selectedValue))
+    .join("");
 }
 
 function sendResult(req, res, httpStatus, result, wantsJson) {
