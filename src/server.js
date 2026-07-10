@@ -5,7 +5,6 @@ import {
   buildPipefyFields,
   buildTitle,
   createPipefyCard,
-  getPipefyFormOptions,
   normalizeInput,
   parseDefaultValues,
   parseFieldMap,
@@ -73,24 +72,40 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-const fallbackOptions = {
+const formOptions = {
   platforms: [
-    { id: "317663860", name: "Feito por IA" },
+    { id: "317845261", name: "Campanha (Troco na Troca)" },
     { id: "317476820", name: "Campanha Facebook" },
-    { id: "317720758", name: "Chat (Plataformas)" },
+    { id: "317720758", name: "Chat (Plataformas) 💻" },
     { id: "317476818", name: "Chave na Mão" },
+    { id: "317663860", name: "Feito por IA" },
     { id: "317681036", name: "Google ADS" },
     { id: "317476796", name: "iCarros" },
+    { id: "317476829", name: "Indicação" },
+    { id: "317476827", name: "Instagram" },
+    { id: "317476821", name: "Marketplace" },
+    { id: "317476813", name: "Mercado Livre" },
+    { id: "317476822", name: "Messenger" },
+    { id: "317476814", name: "Mobiauto" },
+    { id: "317476815", name: "NaPista" },
     { id: "317476817", name: "OLX" },
-    { id: "317476795", name: "Webmotors" }
+    { id: "317476828", name: "Site" },
+    { id: "317672474", name: "Umbler" },
+    { id: "317476795", name: "Webmotors" },
+    { id: "317476826", name: "WhatsApp" }
   ],
   agvs: [
-    { id: "307251915", name: "Alexsandro Mendes" },
+    { id: "307655006", name: "Samuel Modesto" },
+    { id: "307655007", name: "Maria Beatriz Galino" },
+    { id: "307655009", name: "Lorrana Oliveira" },
     { id: "307655010", name: "Amanda Correa Chagas" },
-    { id: "307807456", name: "Ana Shirley" },
     { id: "307655011", name: "Gabrielly da Silva Clementino" },
+    { id: "307756026", name: "Marcela Machado Faria" },
     { id: "307756027", name: "Joice Oliveira" },
-    { id: "307800051", name: "Kaíque Bertolini" }
+    { id: "307798778", name: "Lucas Palermo Ferreira" },
+    { id: "307800051", name: "Kaíque Bertolini" },
+    { id: "307807456", name: "Ana Shirley" },
+    { id: "307864387", name: "KAYLANE BERTOLINI" }
   ]
 };
 
@@ -106,8 +121,7 @@ app.get("/3c/agendamento", async (req, res) => {
   }
 
   const input = normalizeInput(req.query, config.defaultValues);
-  const options = await loadFormOptions(config);
-  return res.send(renderSchedulingForm(input, config, options));
+  return res.send(renderSchedulingForm(input, config, formOptions));
 });
 
 app.post("/3c/agendamento", async (req, res) => {
@@ -154,23 +168,6 @@ app.post("/3c/agendamento", async (req, res) => {
 app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
-
-async function loadFormOptions(config) {
-  try {
-    const options = await getPipefyFormOptions({
-      token: config.pipefyToken,
-      pipeId: config.pipefyPipeId
-    });
-
-    return {
-      platforms: options.platforms.length ? options.platforms : fallbackOptions.platforms,
-      agvs: options.agvs.length ? options.agvs : fallbackOptions.agvs
-    };
-  } catch (error) {
-    console.error(error);
-    return fallbackOptions;
-  }
-}
 
 function renderResult({ status, title, message, card }) {
   const isSuccess = status === "sucesso";
