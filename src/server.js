@@ -7,7 +7,8 @@ import {
   createPipefyCard,
   normalizeInput,
   parseDefaultValues,
-  parseFieldMap
+  parseFieldMap,
+  parseSubmittedValues
 } from "./pipefy.js";
 
 const app = express();
@@ -71,7 +72,22 @@ app.get("/api/config", (req, res) => {
   });
 });
 
-app.all("/3c/agendamento", async (req, res) => {
+app.get("/3c/agendamento", (req, res) => {
+  const config = getConfig();
+
+  if (!validateSecret(req, config)) {
+    return res.status(401).send(renderResult({
+      status: "erro",
+      title: "Chave invalida",
+      message: "A chave de integracao enviada pela 3C nao confere."
+    }));
+  }
+
+  const input = normalizeInput(req.query, config.defaultValues);
+  return res.send(renderSchedulingForm(input, config));
+});
+
+app.post("/3c/agendamento", async (req, res) => {
   const config = getConfig();
   const wantsJson = req.query.formato === "json" || req.body.formato === "json" || req.accepts(["html", "json"]) === "json";
 
@@ -84,7 +100,7 @@ app.all("/3c/agendamento", async (req, res) => {
     return sendResult(req, res, 401, result, wantsJson);
   }
 
-  const input = normalizeInput({ ...req.query, ...req.body }, config.defaultValues);
+  const input = parseSubmittedValues(normalizeInput({ ...req.query, ...req.body }, config.defaultValues));
   const title = buildTitle(config.cardTitleTemplate, input);
   const fields = buildPipefyFields(input, config.fieldMap);
 
@@ -140,6 +156,116 @@ function renderResult({ status, title, message, card }) {
     </main>
   </body>
 </html>`;
+}
+
+function renderSchedulingForm(input, config) {
+  const action = `${config.baseUrl.replace(/\/$/, "")}/3c/agendamento`;
+  const secretInput = config.integrationSecret
+    ? `<input type="hidden" name="chave" value="${escapeHtml(config.integrationSecret)}">`
+    : "";
+
+  return `<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agendamento Pipefy</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="embedded-page">
+    <main class="embedded-shell">
+      <header class="embedded-header">
+        <p class="eyebrow">3C Plus para Pipefy</p>
+        <h1>Novo agendamento</h1>
+      </header>
+      <form class="manual-form" method="post" action="${escapeHtml(action)}">
+        ${secretInput}
+        ${hiddenInput("protocolo", input.protocolo)}
+        ${hiddenInput("identificador", input.identificador)}
+        ${hiddenInput("campanha", input.campanha)}
+        ${hiddenInput("ramal", input.ramal)}
+
+        <label>Nome
+          <input name="nome" value="${escapeHtml(input.nome)}" required>
+        </label>
+
+        <label>Número de telefone
+          <input name="telefone" value="${escapeHtml(input.telefone)}" required>
+        </label>
+
+        <label>Número de contato 2
+          <input name="contato_2" value="${escapeHtml(input.contato_2)}">
+        </label>
+
+        <label>TEM E-MAIL?
+          <select name="tem_email" required>
+            ${option("❌ Não", input.tem_email)}
+            ${option("✅ Sim", input.tem_email)}
+          </select>
+        </label>
+
+        <label>Email
+          <input name="email" type="email" value="${escapeHtml(input.email)}">
+        </label>
+
+        <label>PLATAFORMA
+          <select name="plataforma" required>
+            ${optionValue('["317663860"]', "Feito por IA", input.plataforma)}
+            ${optionValue('["317476820"]', "Campanha Facebook", input.plataforma)}
+            ${optionValue('["317720758"]', "Chat (Plataformas)", input.plataforma)}
+            ${optionValue('["317476818"]', "Chave na Mão", input.plataforma)}
+            ${optionValue('["317681036"]', "Google ADS", input.plataforma)}
+            ${optionValue('["317476796"]', "iCarros", input.plataforma)}
+            ${optionValue('["317476817"]', "OLX", input.plataforma)}
+            ${optionValue('["317476795"]', "Webmotors", input.plataforma)}
+          </select>
+        </label>
+
+        <label>DATA DO AGENDAMENTO
+          <input name="data_agendamento" type="date" value="${escapeHtml(input.data_agendamento)}" required>
+        </label>
+
+        <label>AGV
+          <select name="agv" required>
+            ${optionValue('["307251915"]', "Alexsandro Mendes", input.agv)}
+            ${optionValue('["307655010"]', "Amanda Correa Chagas", input.agv)}
+            ${optionValue('["307807456"]', "Ana Shirley", input.agv)}
+            ${optionValue('["307655011"]', "Gabrielly da Silva Clementino", input.agv)}
+            ${optionValue('["307756027"]', "Joice Oliveira", input.agv)}
+            ${optionValue('["307800051"]', "Kaíque Bertolini", input.agv)}
+          </select>
+        </label>
+
+        <label>Loja
+          <select name="loja" required>
+            ${option("📍 Nova Iguaçu", input.loja)}
+            ${option("📍 Duque de Caxias", input.loja)}
+          </select>
+        </label>
+
+        <label class="wide">Observação
+          <textarea name="observacao" rows="4">${escapeHtml(input.observacao)}</textarea>
+        </label>
+
+        <button class="submit" type="submit">Criar card no Pipefy</button>
+      </form>
+    </main>
+  </body>
+</html>`;
+}
+
+function hiddenInput(name, value) {
+  return `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}">`;
+}
+
+function option(value, selectedValue) {
+  return optionValue(value, value, selectedValue);
+}
+
+function optionValue(value, label, selectedValue) {
+  const normalized = Array.isArray(selectedValue) ? JSON.stringify(selectedValue) : String(selectedValue ?? "");
+  const selected = normalized === value ? " selected" : "";
+  return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
 }
 
 function sendResult(req, res, httpStatus, result, wantsJson) {

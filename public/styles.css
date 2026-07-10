@@ -97,13 +97,16 @@ h2 {
   gap: 10px;
 }
 
-input {
+input,
+select,
+textarea {
   width: 100%;
   min-height: 42px;
   border: 1px solid #c9d1dd;
   padding: 10px 12px;
   color: var(--text);
   font: inherit;
+  background: #fff;
 }
 
 button,
@@ -153,6 +156,11 @@ label input {
   margin-top: 6px;
 }
 
+label select,
+label textarea {
+  margin-top: 6px;
+}
+
 .wide,
 .submit {
   grid-column: 1 / -1;
@@ -187,10 +195,45 @@ label input {
   background: var(--success);
 }
 
+.embedded-page {
+  min-height: 100vh;
+  background: #f7f8fb;
+}
+
+.embedded-shell {
+  width: min(760px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 18px 0;
+}
+
+.embedded-header {
+  margin-bottom: 14px;
+}
+
+.embedded-header h1 {
+  margin-bottom: 0;
+  font-size: 28px;
+}
+
+.manual-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 18px;
+}
+
+.manual-form .wide,
+.manual-form .submit {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 720px) {
   .hero,
   .copy-row,
-  .grid {
+  .grid,
+  .manual-form {
     grid-template-columns: 1fr;
   }
 

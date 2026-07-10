@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPipefyFields, buildTitle, normalizeInput, parseDefaultValues, parseFieldMap } from "../src/pipefy.js";
+import { buildPipefyFields, buildTitle, normalizeInput, parseDefaultValues, parseFieldMap, parseSubmittedValues } from "../src/pipefy.js";
 
 test("normaliza parametros vindos da 3C", () => {
   const input = normalizeInput({
@@ -60,4 +60,16 @@ test("valida JSON do mapa de campos", () => {
   assert.deepEqual(parseFieldMap('{"nome":"nome_cliente"}'), { nome: "nome_cliente" });
   assert.throws(() => parseFieldMap("nao-json"), /PIPEFY_FIELD_MAP invalido/);
   assert.deepEqual(parseDefaultValues('{"tem_email":"Nao"}'), { tem_email: "Nao" });
+});
+
+test("converte valores enviados por selects com listas JSON", () => {
+  const input = parseSubmittedValues({
+    plataforma: '["317663860"]',
+    agv: '["307251915"]',
+    nome: "Ana"
+  });
+
+  assert.deepEqual(input.plataforma, ["317663860"]);
+  assert.deepEqual(input.agv, ["307251915"]);
+  assert.equal(input.nome, "Ana");
 });

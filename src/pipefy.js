@@ -45,6 +45,29 @@ export function normalizeInput(query, defaultValues = {}) {
   return applyDefaultValues(input, defaultValues);
 }
 
+export function parseSubmittedValues(input) {
+  return Object.fromEntries(
+    Object.entries(input).map(([key, value]) => [key, parseSubmittedValue(value)])
+  );
+}
+
+function parseSubmittedValue(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    return value;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return value;
+  }
+}
+
 export function applyDefaultValues(input, defaultValues) {
   return Object.fromEntries(
     Object.entries(input).map(([key, value]) => [
