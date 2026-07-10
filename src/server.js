@@ -160,7 +160,8 @@ app.post("/3c/agendamento", async (req, res) => {
     return sendResult(req, res, 500, {
       status: "erro",
       title: "Nao foi possivel criar o card",
-      message: error.message
+      message: error.message,
+      retryUrl: buildRetryUrl(req.body, config)
     }, wantsJson);
   }
 });
@@ -169,10 +170,13 @@ app.get("/health", (req, res) => {
   res.json({ ok: true });
 });
 
-function renderResult({ status, title, message, card }) {
+function renderResult({ status, title, message, card, retryUrl }) {
   const isSuccess = status === "sucesso";
   const cardLink = card?.url
     ? `<a class="button" href="${escapeHtml(card.url)}" target="_blank" rel="noreferrer">Abrir card no Pipefy</a>`
+    : "";
+  const retryLink = !isSuccess && retryUrl
+    ? `<a class="button secondary" href="${escapeHtml(retryUrl)}">Tentar novamente</a>`
     : "";
 
   return `<!doctype html>
@@ -189,10 +193,46 @@ function renderResult({ status, title, message, card }) {
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(message)}</p>
       ${card?.id ? `<p class="muted">Card: ${escapeHtml(card.id)} - ${escapeHtml(card.title || "")}</p>` : ""}
-      ${cardLink}
+      <div class="result-actions">
+        ${cardLink}
+        ${retryLink}
+      </div>
     </main>
   </body>
 </html>`;
+}
+
+function buildRetryUrl(input, config) {
+  const params = new URLSearchParams();
+  const keys = [
+    "nome",
+    "telefone",
+    "contato_2",
+    "tem_email",
+    "email",
+    "plataforma",
+    "data_agendamento",
+    "agv",
+    "loja",
+    "observacao",
+    "protocolo",
+    "identificador",
+    "campanha",
+    "ramal"
+  ];
+
+  for (const key of keys) {
+    const value = input[key];
+    if (value !== undefined && value !== null && value !== "") {
+      params.set(key, typeof value === "string" ? value : JSON.stringify(value));
+    }
+  }
+
+  if (config.integrationSecret) {
+    params.set("chave", config.integrationSecret);
+  }
+
+  return `${config.baseUrl.replace(/\/$/, "")}/3c/agendamento?${params.toString()}`;
 }
 
 function renderSchedulingForm(input, config, options) {
