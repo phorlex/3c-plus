@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildPipefyFields, buildTitle, cleanPlaceholder, formatBrazilianPhone, normalizeInput, parseDefaultValues, parseFieldMap, parseSubmittedValues } from "../src/pipefy.js";
+import { buildPipefyFields, buildTitle, cleanPlaceholder, formatBrazilianPhone, normalizeInput, parseFieldMap, parseSubmittedValues } from "../src/pipefy.js";
 
 test("normaliza parametros vindos da 3C", () => {
   const input = normalizeInput({
@@ -39,27 +39,9 @@ test("gera fields_attributes com o mapa configurado", () => {
   ]);
 });
 
-test("aplica valores padrao quando a 3C nao envia o campo", () => {
-  const input = normalizeInput(
-    { nome: "Ana", telefone: "11999999999" },
-    { tem_email: "❌ Não", plataforma: ["317663860"], agv: ["307251915"] }
-  );
-
-  assert.equal(input.nome, "Ana");
-  assert.equal(input.tem_email, "❌ Não");
-  assert.deepEqual(input.plataforma, ["317663860"]);
-  assert.deepEqual(input.agv, ["307251915"]);
-});
-
-test("suporta data padrao opcional como hoje", () => {
-  const input = normalizeInput({}, { data_agendamento: "__today" });
-  assert.match(input.data_agendamento, /^\d{4}-\d{2}-\d{2}$/);
-});
-
 test("valida JSON do mapa de campos", () => {
   assert.deepEqual(parseFieldMap('{"nome":"nome_cliente"}'), { nome: "nome_cliente" });
   assert.throws(() => parseFieldMap("nao-json"), /PIPEFY_FIELD_MAP invalido/);
-  assert.deepEqual(parseDefaultValues('{"tem_email":"Nao"}'), { tem_email: "Nao" });
 });
 
 test("converte valores enviados por selects com listas JSON", () => {
@@ -72,6 +54,16 @@ test("converte valores enviados por selects com listas JSON", () => {
   assert.deepEqual(input.plataforma, ["317663860"]);
   assert.deepEqual(input.agv, ["307251915"]);
   assert.equal(input.nome, "Ana");
+});
+
+test("converte plataforma e agv simples para listas de IDs", () => {
+  const input = parseSubmittedValues({
+    plataforma: "317663860",
+    agv: "307655006"
+  });
+
+  assert.deepEqual(input.plataforma, ["317663860"]);
+  assert.deepEqual(input.agv, ["307655006"]);
 });
 
 test("formata telefones brasileiros para o Pipefy", () => {

@@ -4,10 +4,6 @@ export function parseFieldMap(rawValue) {
   return parseJsonObject(rawValue, "PIPEFY_FIELD_MAP");
 }
 
-export function parseDefaultValues(rawValue) {
-  return parseJsonObject(rawValue, "PIPEFY_DEFAULT_VALUES");
-}
-
 function parseJsonObject(rawValue, envName) {
   if (!rawValue || !rawValue.trim()) {
     return {};
@@ -24,7 +20,7 @@ function parseJsonObject(rawValue, envName) {
   }
 }
 
-export function normalizeInput(query, defaultValues = {}) {
+export function normalizeInput(query) {
   const input = {
     nome: cleanPlaceholder(query.nome || query.name || ""),
     telefone: formatBrazilianPhone(query.telefone || query.numero_de_telefone || query.phone || ""),
@@ -42,7 +38,7 @@ export function normalizeInput(query, defaultValues = {}) {
     observacao: cleanPlaceholder(query.observacao || query.obs || "")
   };
 
-  return applyDefaultValues(input, defaultValues);
+  return input;
 }
 
 export function cleanPlaceholder(value) {
@@ -70,44 +66,31 @@ export function formatBrazilianPhone(value) {
 
 export function parseSubmittedValues(input) {
   return Object.fromEntries(
-    Object.entries(input).map(([key, value]) => [key, parseSubmittedValue(value)])
+    Object.entries(input).map(([key, value]) => [key, parseSubmittedValue(key, value)])
   );
 }
 
-function parseSubmittedValue(value) {
+function parseSubmittedValue(key, value) {
   if (typeof value !== "string") {
     return value;
   }
 
   const trimmed = value.trim();
   if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    if ((key === "plataforma" || key === "agv") && trimmed) {
+      return [trimmed];
+    }
     return value;
   }
 
   try {
     return JSON.parse(trimmed);
   } catch {
+    if ((key === "plataforma" || key === "agv") && trimmed) {
+      return [trimmed];
+    }
     return value;
   }
-}
-
-export function applyDefaultValues(input, defaultValues) {
-  return Object.fromEntries(
-    Object.entries(input).map(([key, value]) => [
-      key,
-      value === "" || value === undefined || value === null
-        ? resolveDefaultValue(defaultValues[key])
-        : value
-    ])
-  );
-}
-
-function resolveDefaultValue(value) {
-  if (value === "__today") {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  return value ?? "";
 }
 
 export function buildTitle(template, input) {

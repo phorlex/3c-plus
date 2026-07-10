@@ -6,7 +6,6 @@ import {
   buildTitle,
   createPipefyCard,
   normalizeInput,
-  parseDefaultValues,
   parseFieldMap,
   parseSubmittedValues
 } from "./pipefy.js";
@@ -35,7 +34,6 @@ function getConfig() {
     pipefyPipeId: process.env.PIPEFY_PIPE_ID || "",
     integrationSecret: process.env.INTEGRATION_SECRET || "",
     cardTitleTemplate: process.env.PIPEFY_CARD_TITLE || "Agendamento 3C - {nome}",
-    defaultValues: parseDefaultValues(process.env.PIPEFY_DEFAULT_VALUES || "{}"),
     fieldMap: parseFieldMap(process.env.PIPEFY_FIELD_MAP || "{}")
   };
 }
@@ -67,7 +65,6 @@ app.get("/api/config", (req, res) => {
     configured: Boolean(config.pipefyToken && config.pipefyPipeId),
     baseUrl: config.baseUrl,
     integrationUrl: `${config.baseUrl.replace(/\/$/, "")}/3c/agendamento?${params.join("&")}`,
-    defaultValues: Object.keys(config.defaultValues),
     mappedFields: Object.keys(config.fieldMap)
   });
 });
@@ -120,7 +117,7 @@ app.get("/3c/agendamento", async (req, res) => {
     }));
   }
 
-  const input = normalizeInput(req.query, config.defaultValues);
+  const input = normalizeInput(req.query);
   return res.send(renderSchedulingForm(input, config, formOptions));
 });
 
@@ -144,7 +141,7 @@ app.post("/3c/agendamento", async (req, res) => {
     return sendResult(req, res, 401, result, wantsJson);
   }
 
-  const input = parseSubmittedValues(normalizeInput({ ...req.query, ...req.body }, config.defaultValues));
+  const input = parseSubmittedValues(normalizeInput({ ...req.query, ...req.body }));
   const title = buildTitle(config.cardTitleTemplate, input);
   const fields = buildPipefyFields(input, config.fieldMap);
 
@@ -161,7 +158,8 @@ app.post("/3c/agendamento", async (req, res) => {
     loja: input.loja,
     data_agendamento: input.data_agendamento,
     fieldCount: fields.length,
-    fieldIds: fields.map((field) => field.field_id)
+    fieldIds: fields.map((field) => field.field_id),
+    fieldValues: pickLoggedFieldValues(fields, ["plataforma", "agv", "loja"])
   });
 
   try {
@@ -196,7 +194,8 @@ app.post("/3c/agendamento", async (req, res) => {
       identificador: input.identificador,
       title,
       fieldCount: fields.length,
-      fieldIds: fields.map((field) => field.field_id)
+      fieldIds: fields.map((field) => field.field_id),
+      fieldValues: pickLoggedFieldValues(fields, ["plataforma", "agv", "loja"])
     });
 
     return sendResult(req, res, 500, {
@@ -318,6 +317,7 @@ function renderSchedulingForm(input, config, options) {
 
         <label>TEM E-MAIL?
           <select name="tem_email" required>
+            ${emptyOption("Selecione", input.tem_email)}
             ${option("❌ Não", input.tem_email)}
             ${option("✅ Sim", input.tem_email)}
           </select>
@@ -411,6 +411,14 @@ function logEvent(level, event, data = {}) {
     return;
   }
   console.log(line);
+}
+
+function pickLoggedFieldValues(fields, fieldIds) {
+  return Object.fromEntries(
+    fields
+      .filter((field) => fieldIds.includes(field.field_id))
+      .map((field) => [field.field_id, field.field_value])
+  );
 }
 
 function sendResult(req, res, httpStatus, result, wantsJson) {

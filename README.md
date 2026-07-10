@@ -136,17 +136,10 @@ Pela tela enviada, o mapa deve seguir estes titulos:
 No Railway, comece com:
 
 ```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não"}
 PIPEFY_FIELD_MAP={"nome":"nome","telefone":"n_mero_de_telefone","contato_2":"n_mero_de_contato_2","tem_email":"tem_e_mail","email":"email","plataforma":"plataforma","data_agendamento":"data_do_agendamento","agv":"agv","loja":"loja","observacao":"observa_o"}
 ```
 
 Se o Pipefy retornar erro dizendo que algum campo nao existe, copie o `field_id` real desse campo no Pipefy e troque o valor da direita.
-
-Para campos predefinidos, configure `PIPEFY_DEFAULT_VALUES`. Pela tela enviada:
-
-```env
-PIPEFY_DEFAULT_VALUES={"tem_email":"❌ Não"}
-```
 
 Use `✅ Sim` ou `❌ Não` em `tem_email`. Para `plataforma`, use o ID da etiqueta dentro de uma lista. Para `agv`, use o ID do usuario dentro de uma lista.
 
@@ -161,13 +154,11 @@ IDs confirmados no Pipefy:
 | Email | `email` | email | email |
 | PLATAFORMA | `plataforma` | label_select | `317663860` = Feito por IA |
 | DATA DO AGENDAMENTO | `data_do_agendamento` | date | `AAAA-MM-DD` |
-| AGV | `agv` | assignee_select | `307251915` = Alexsandro Mendes |
+| AGV | `agv` | assignee_select | IDs da lista fixa do formulario |
 | Loja | `loja` | select | `📍 Nova Iguaçu`, `📍 Duque de Caxias` |
 | Observacao | `observa_o` | long_text | texto |
 
-Se a 3C enviar algum desses parametros na URL, o valor da 3C substitui o valor padrao.
-
-Se quiser preencher uma data fixa para testes, use `data_agendamento` em `PIPEFY_DEFAULT_VALUES` no formato aceito pelo Pipefy (`AAAA-MM-DD`). Para producao, deixe sem data fixa e envie `data_agendamento=AAAA-MM-DD` na URL quando houver uma data definida.
+Nao existem valores automaticos de fallback para plataforma, AGV, loja, e-mail ou data. O atendente escolhe tudo manualmente no formulario.
 
 ## Observacao de seguranca
 
